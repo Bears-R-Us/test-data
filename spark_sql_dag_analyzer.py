@@ -1291,7 +1291,7 @@ print(f"Primary bottleneck: {assessment['primary_bottleneck']}")
 """
 
 
-ui_url = "http://your-url-here”
+ui_url = "http://your-url-here"
 execution_id = 0
 print(analyze_last_execution(ui_url, execution_id=execution_id))
 
