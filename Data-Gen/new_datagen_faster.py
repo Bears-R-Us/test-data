@@ -8,7 +8,7 @@ from pyspark.sql import SparkSession, Row
 
 target_size = 1 * 1024**3 # 1 GB
 num_nodes_per_graph = 500_000
-PATH_PREFIX = f"/scratch/prestouser/test-data/{num_nodes_per_graph}-{target_size // 1024**3}GB"
+PATH_PREFIX = f"test-data/{num_nodes_per_graph}-{target_size // 1024**3}GB"
 directory_path = PATH_PREFIX
 
 spark = (
@@ -54,15 +54,26 @@ params = {
 target_distribution = create_synthetic_distribution(params, 200_000)
 
 def get_disk_usage(path):
+    import platform
     try:
-        result = subprocess.run(
-            ['du', '-sb', path],
-            check=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
-        )
-        size_in_bytes = int(result.stdout.split()[0])
+        if platform.system() == "Darwin":
+            result = subprocess.run(
+                ['du', '-sk', path],
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
+            size_in_bytes = int(result.stdout.split()[0]) * 1024
+        else:
+            result = subprocess.run(
+                ['du', '-sb', path],
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
+            size_in_bytes = int(result.stdout.split()[0])
         return size_in_bytes
     except subprocess.CalledProcessError as e:
         raise RuntimeError(f"Failed to get disk usage: {e.stderr.strip()}")

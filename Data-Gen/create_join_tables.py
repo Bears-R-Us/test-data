@@ -21,7 +21,7 @@ spark = (
 
 target_size = 1 * 1024**3 # 10 GB
 num_nodes_per_graph = 500_000
-PATH_PREFIX = f"/scratch/prestouser/test-data/{num_nodes_per_graph}-{target_size // 1024**3}GB"
+PATH_PREFIX = f"test-data/{num_nodes_per_graph}-{target_size // 1024**3}GB"
 
 # -------------------------------------
 # Step 1. Read all sheets from the Excel file.
