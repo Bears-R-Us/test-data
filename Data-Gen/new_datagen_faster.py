@@ -6,9 +6,10 @@ import numpy as np
 import pandas as pd
 from pyspark.sql import SparkSession, Row
 
-target_size = 1 * 1024**3 # 1 GB
+target_size = 50 * 1024**3 # 1 GB
 num_nodes_per_graph = 500_000
 PATH_PREFIX = f"test-data/{num_nodes_per_graph}-{target_size // 1024**3}GB"
+PATH_PREFIX = f"/scratch/prestouser/test-data/{num_nodes_per_graph}-{target_size // 1024**3}GB"
 directory_path = PATH_PREFIX
 
 spark = (
@@ -17,9 +18,11 @@ spark = (
     .appName("LargeGraph")
     .config("spark.driver.host", "127.0.0.1")
     .config("spark.driver.bindAddress", "127.0.0.1")
-    .config("spark.driver.memory", "32g")
+    .config("spark.driver.memory", "128g")
     .config("spark.executor.heartbeatInterval", "60s")
     .config("spark.network.timeout", "300s")
+    .config("spark.memory.fraction", "0.8")
+    .config("spark.sql.shuffle.partitions", "800")
     .getOrCreate()
 )
 def create_synthetic_distribution(params, plot=True):
@@ -206,7 +209,7 @@ df_original = spark.read.parquet(directory_path)
 
 if 'source' in df_original.columns:
 	df_original = df_original.drop('source')
-	
+
 # Create a "copy_id" Dataframe
 df_copies = spark.range(copies_needed).toDF("copy_id")
 
