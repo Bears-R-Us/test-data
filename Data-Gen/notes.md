@@ -1,3 +1,54 @@
+1. new_datagen_faster.py
+2. create_join_tables.py
+
+new_datagen_faster.py runs first. It generates the base table_a data by:
+
+Creating synthetic graph partitions using a power-law degree distribution (via networkx configuration models)
+Writing the initial edge data as parquet to PATH_PREFIX
+Scaling it up to the target size (1 GB) by cross-joining copies with noise
+Then create_join_tables.py runs second. It:
+
+Reads the table_a parquet that new_datagen_faster.py produced (line 37: table_a = spark.read.parquet(PATH_PREFIX))
+Generates the other tables (table_b, table_c, table_d, table_e) from schema metadata in an Excel file
+Forces join-key alignment by overwriting a percentage of rows in each table with values from table_b
+
+
+## 50 GB
+target_sze = 50 * 1024**3 # 1 GB
+num_nodes_per_graph is still 500_000 
+
+### Spark CPU
+
+workflow_join-50gb.py changes the config.  But I doubt this is optimal.  Running on `2xGrace` (144 cores)
+.config("spark.driver.memory", "128g")
+.config("spark.memory.fraction", "0.8")
+.config("spark.sql.shuffle.partitions", "800")
+
+```
+Workflow join completed in 1235.04 seconds
+  Output: /scratch/prestouser/test-data/500000-50GB/workflow_join_spark_output
+  Result rows: 2662631628
+```
+
+### cuDF-Polars
+workflow_join_polars-50gb.py Running on full NVL4: 2xGrace 4xB200 
+
+workflow_join_polars-50gb.py
+
+```
+Workflow join completed in 43.47 seconds
+  Output: /scratch/prestouser/test-data/500000-50GB/workflow_join_polars_output
+  Result rows: 2662631628
+
+RapidsMPF statistics:
+Statistics:
+ - alloc-device:                353.05 GiB | 1.63 s | 216.76 GiB/s | avg-stream-delay 2.02 ms
+ - alloc-host:                  1.98 KiB | 270.61 us | 7.14 MiB/s | avg-stream-delay 97.29 us
+ - copy-device-to-pinned_host:  322.07 GiB | 2.94 s | 109.71 GiB/s | avg-stream-delay 996.55 us
+ - copy-pinned_host-to-device:  322.07 GiB | 1.71 s | 188.09 GiB/s | avg-stream-delay 26.02 us
+```
+
+
 ## 1GB
 
 target_size = 1 * 1024**3 # 1 GB
