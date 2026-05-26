@@ -6,10 +6,9 @@ import numpy as np
 import pandas as pd
 from pyspark.sql import SparkSession, Row
 
-target_size = 50 * 1024**3 # 1 GB
+target_size = 1 * 1024**4 # 1 TB
 num_nodes_per_graph = 500_000
-PATH_PREFIX = f"test-data/{num_nodes_per_graph}-{target_size // 1024**3}GB"
-PATH_PREFIX = f"/scratch/prestouser/test-data/{num_nodes_per_graph}-{target_size // 1024**3}GB"
+PATH_PREFIX = f"/scratch/prestouser/test-data/{num_nodes_per_graph}-1TB"
 directory_path = PATH_PREFIX
 
 spark = (
@@ -23,6 +22,7 @@ spark = (
     .config("spark.network.timeout", "300s")
     .config("spark.memory.fraction", "0.8")
     .config("spark.sql.shuffle.partitions", "800")
+    .config("spark.local.dir", "/scratch/prestouser/spark-tmp")
     .getOrCreate()
 )
 def create_synthetic_distribution(params, plot=True):

@@ -16,15 +16,15 @@ spark = (
     .config("spark.driver.memory", "128g")
     .config("spark.memory.fraction", "0.8")
     .config("spark.sql.shuffle.partitions", "800")
+    .config("spark.local.dir", "/scratch/prestouser/spark-tmp")
     .config("spark.executor.heartbeatInterval", "60s")
     .config("spark.network.timeout", "300s")
     .getOrCreate()
 )
 
-target_size = 50 * 1024**3 # 10 GB
+target_size = 1 * 1024**4 # 1 TB
 num_nodes_per_graph = 500_000
-PATH_PREFIX = f"test-data/{num_nodes_per_graph}-{target_size // 1024**3}GB"
-PATH_PREFIX = f"/scratch/prestouser/test-data/{num_nodes_per_graph}-{target_size // 1024**3}GB"
+PATH_PREFIX = f"/scratch/prestouser/test-data/{num_nodes_per_graph}-1TB"
 
 # -------------------------------------
 # Step 1. Read all sheets from the Excel file.
